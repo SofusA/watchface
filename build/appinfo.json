@@ -12,10 +12,11 @@
         "watchface": true
     },
     "messageKeys": {
-        "WEATHER_ICON": 10000,
-        "WEATHER_TEMPERATURE": 10001,
-        "WEATHER_UV": 10002,
-        "WEATHER_PRECIPITATION": 10003
+        "WEATHER_REFRESH": 10000,
+        "WEATHER_ICON": 10001,
+        "WEATHER_TEMPERATURE": 10002,
+        "WEATHER_UV": 10003,
+        "WEATHER_PRECIPITATION": 10004
     },
     "capabilities": [
         "location"
@@ -80,9 +81,10 @@
     "versionLabel": "1.0",
     "companyName": "sofusa",
     "appKeys": {
-        "WEATHER_ICON": 10000,
-        "WEATHER_TEMPERATURE": 10001,
-        "WEATHER_UV": 10002,
-        "WEATHER_PRECIPITATION": 10003
+        "WEATHER_REFRESH": 10000,
+        "WEATHER_ICON": 10001,
+        "WEATHER_TEMPERATURE": 10002,
+        "WEATHER_UV": 10003,
+        "WEATHER_PRECIPITATION": 10004
     }
 }

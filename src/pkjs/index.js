@@ -242,9 +242,7 @@ function requestWeather() {
       fetchWeather(pos.coords.latitude, pos.coords.longitude);
     },
     function(err) {
-      console.log("Location error, using fallback (Copenhagen): " + JSON.stringify(err));
-      // Fallback for emulator/dev
-      fetchWeather(55.6761, 12.5683);
+      console.log("Location error: " + JSON.stringify(err));
     },
     { timeout: 15000, maximumAge: 600000 }
   );
@@ -253,11 +251,8 @@ function requestWeather() {
 Pebble.addEventListener("ready", function() {
   console.log("PKJS ready");
   requestWeather();
-  // Refresh every 30 minutes
-  setInterval(requestWeather, 30 * 60 * 1000);
 });
 
-// Optional: let the watchface ping pkjs to force refresh
 Pebble.addEventListener("appmessage", function(e) {
   console.log("AppMessage received from watch, refreshing weather");
   requestWeather();

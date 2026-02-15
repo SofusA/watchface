@@ -143,10 +143,6 @@ static void update_display(void) {
   text_layer_set_text(date_temp_layer, date_temp_buffer);
 }
 
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_display();
-}
-
 static void weather_on_temp(const char *temp_text) {
   snprintf(latest_temp, sizeof(latest_temp), "%s", temp_text ? temp_text : "---");
   update_display();
@@ -313,6 +309,33 @@ static void window_unload(Window *window) {
 
 // ---------- Init ----------
 
+static void send_weather_refresh(void) {
+  DictionaryIterator *iter;
+  AppMessageResult res = app_message_outbox_begin(&iter);
+  if (res != APP_MSG_OK) {
+    return; 
+  }
+
+  dict_write_uint8(iter, MESSAGE_KEY_WEATHER_REFRESH, 1);
+  dict_write_end(iter);
+  app_message_outbox_send();
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  update_display();
+
+  if (tick_time->tm_min % 15 == 0) {
+    send_weather_refresh();
+  }
+}
+
+static void bt_handler(bool connected) {
+  if (connected) {
+    send_weather_refresh();
+  }
+}
+
+
 static void init(void) {
   s_window = window_create();
   window_set_window_handlers(s_window, (WindowHandlers){
@@ -322,9 +345,10 @@ static void init(void) {
   window_stack_push(s_window, true);
 
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  connection_service_subscribe((ConnectionHandlers){ .pebble_app_connection_handler = bt_handler });
 
   app_message_register_inbox_received(inbox_received_handler);
-  app_message_open(64, 64);
+  app_message_open(128, 128);
 }
 
 static void deinit(void) {

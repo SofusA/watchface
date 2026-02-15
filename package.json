@@ -21,6 +21,7 @@
       "watchface": true
     },
     "messageKeys": [
+      "WEATHER_REFRESH",
       "WEATHER_ICON",
       "WEATHER_TEMPERATURE",
       "WEATHER_UV",
