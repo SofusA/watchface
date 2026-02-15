@@ -1,6 +1,6 @@
 {
-  "name": "weather",
-  "author": "Sofus",
+  "name": "watchface",
+  "author": "sofusa",
   "version": "1.0.0",
   "keywords": [
     "pebble-app"

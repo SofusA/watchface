@@ -72,11 +72,11 @@
             }
         ]
     },
-    "name": "weather",
+    "name": "watchface",
     "shortName": "weather",
     "longName": "weather",
     "versionLabel": "1.0",
-    "companyName": "Sofus",
+    "companyName": "sofusa",
     "appKeys": {
         "WEATHER_ICON": 10000,
         "WEATHER_TEMPERATURE": 10001
