@@ -14,4 +14,5 @@ void weather_init(
 );
 
 void weather_deinit(void);
-void inbox_received_handler(DictionaryIterator *iter, void *context);
+void weather_inbox_parse(DictionaryIterator *iter);
+

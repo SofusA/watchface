@@ -45,7 +45,7 @@ void set_weather_icon(int32_t idx) {
   bitmap_layer_set_bitmap(s_icon_layer, s_icon_bitmap);
 }
 
-void inbox_received_handler(DictionaryIterator *iter, void *context) {
+void weather_inbox_parse(DictionaryIterator *iter) {
   // Temperature: "12°"
   Tuple *temp_t = dict_find(iter, MESSAGE_KEY_WEATHER_TEMPERATURE);
   if (temp_t && s_on_temp) {
