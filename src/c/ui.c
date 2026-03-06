@@ -197,7 +197,7 @@ Ui* ui_create(Window *window) {
   ui->precip_layer = text_layer_create(GRect(0, 0, ICON_W, ICON_H));
   text_layer_set_background_color(ui->precip_layer, GColorClear);
   text_layer_set_text_color(ui->precip_layer, GColorWhite);
-  text_layer_set_font(ui->precip_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_font(ui->precip_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_text_alignment(ui->precip_layer, GTextAlignmentCenter);
   text_layer_set_text(ui->precip_layer, "");
   layer_set_hidden(text_layer_get_layer(ui->precip_layer), true);

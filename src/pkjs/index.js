@@ -1,7 +1,7 @@
-var getImageId = require('./symbolMap');
-var latest = require('./latestData');
-var fetchWeather = require('./weather');
-var fetchSunNextEvent = require('./sun');
+var getImageId = require("./symbolMap");
+var latest = require("./latestData");
+var fetchWeather = require("./weather");
+var fetchSunNextEvent = require("./sun");
 
 function sendDataToPebble(temp, icon_code, uv, prec, sunEventStr) {
   var icon = getImageId(icon_code);
@@ -11,21 +11,20 @@ function sendDataToPebble(temp, icon_code, uv, prec, sunEventStr) {
     WEATHER_ICON: icon,
     WEATHER_UV: uv,
     WEATHER_PRECIPITATION: prec,
-    SUN_EVENT: sunEventStr || '--:--'
+    SUN_EVENT: sunEventStr || "--:--",
   });
 }
 
 function maybeSend() {
   var d = latest.latestData;
-  if (d.temp !== null &&
-      d.icon_code !== null &&
-      d.uv !== null &&
-      d.precipitation !== null &&
-      d.sunEventStr !== null) {
-
-    sendDataToPebble(
-      d.temp, d.icon_code, d.uv, d.precipitation, d.sunEventStr
-    );
+  if (
+    d.temp !== null &&
+    d.icon_code !== null &&
+    d.uv !== null &&
+    d.precipitation !== null &&
+    d.sunEventStr !== null
+  ) {
+    sendDataToPebble(d.temp, d.icon_code, d.uv, d.precipitation, d.sunEventStr);
   }
 }
 
