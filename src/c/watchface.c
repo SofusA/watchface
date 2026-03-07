@@ -18,8 +18,9 @@ static int     s_batt_percent  = 100;
 // Scratch buffers we own
 static char s_time_buf[6];
 static char s_date_buf[20];
-static char s_latest_temp[8] = "---";
-static char s_sun_next[8]    = "--:--";
+
+// Latest weather temps
+static int32_t s_cur = 0, s_max = 0, s_min = 0;
 
 // ---------- Helpers ----------
 static void prv_update_time_date(void) {
@@ -45,10 +46,6 @@ static void prv_update_time_date(void) {
   ui_set_date(s_ui, s_date_buf);
 }
 
-static void prv_update_weather_row(void) {
-  ui_set_weather_row(s_ui, s_latest_temp, s_sun_next);
-}
-
 static void prv_relayout(void) {
   if (!s_window || !s_ui) return;
 
@@ -60,23 +57,20 @@ static void prv_relayout(void) {
   ui_relayout(s_ui, s_is_obstructed, s_last_uv, s_last_precip);
 }
 
-// ---------- Weather callbacks ----------
-static void on_weather_temp(const char *temp_text) {
-  snprintf(s_latest_temp, sizeof(s_latest_temp), "%s", temp_text ? temp_text : "---");
-  prv_update_weather_row();
-}
-static void on_weather_uv(int32_t uv) {
+// ---------- Weather unified callback ----------
+static void on_weather_update(
+  int32_t cur, int32_t max, int32_t min, int32_t uv, int32_t precip
+) {
+  s_cur = cur;
+  s_max = max;
+  s_min = min;
+
   s_last_uv = uv;
+  s_last_precip = precip;
+
+  ui_set_precip(s_ui, precip);
+  ui_set_weather_row(s_ui, cur, max, min);
   prv_relayout();
-}
-static void on_weather_precip(int32_t mm) {
-  s_last_precip = mm;
-  ui_set_precip(s_ui, mm);
-  prv_relayout();
-}
-static void on_weather_sun(const char *t) {
-  snprintf(s_sun_next, sizeof(s_sun_next), "%s", t ? t : "--:--");
-  prv_update_weather_row();
 }
 
 // ---------- Services ----------
@@ -114,15 +108,12 @@ static void window_load(Window *window) {
   // Weather module gets the main icon layer to own its bitmap
   weather_init(
     ui_get_main_icon_layer(s_ui),
-    on_weather_temp,
-    on_weather_uv,
-    on_weather_precip,
-    on_weather_sun
+    on_weather_update
   );
 
   // Initial content
   prv_update_time_date();
-  prv_update_weather_row();
+  // Leave weather row placeholder as set in UI until first update arrives
   prv_relayout();
 }
 

@@ -1,9 +1,6 @@
 var getImageId = require("./symbolMap");
-var latest = require("./latestData");
-var fetchWeather = require("./weather");
-var fetchSunNextEvent = require("./sun");
 
-function sendDataToPebble(temp, icon_code, uv, prec, sunEventStr) {
+function sendDataToPebble(temp, icon_code, uv, prec, min, max) {
   var icon = getImageId(icon_code);
 
   Pebble.sendAppMessage({
@@ -11,31 +8,17 @@ function sendDataToPebble(temp, icon_code, uv, prec, sunEventStr) {
     WEATHER_ICON: icon,
     WEATHER_UV: uv,
     WEATHER_PRECIPITATION: prec,
-    SUN_EVENT: sunEventStr || "--:--",
+    WEATHER_MIN: min,
+    WEATHER_MAX: max,
   });
-}
-
-function maybeSend() {
-  var d = latest.latestData;
-  if (
-    d.temp !== null &&
-    d.icon_code !== null &&
-    d.uv !== null &&
-    d.precipitation !== null &&
-    d.sunEventStr !== null
-  ) {
-    sendDataToPebble(d.temp, d.icon_code, d.uv, d.precipitation, d.sunEventStr);
-  }
 }
 
 function requestWeather() {
   navigator.geolocation.getCurrentPosition(function (pos) {
-    latest.reset();
     var lat = pos.coords.latitude;
     var lon = pos.coords.longitude;
 
-    fetchWeather(lat, lon, maybeSend);
-    fetchSunNextEvent(lat, lon, maybeSend);
+    fetchWeather(lat, lon);
   });
 }
 
@@ -46,3 +29,50 @@ Pebble.addEventListener("ready", function () {
 Pebble.addEventListener("appmessage", function () {
   requestWeather();
 });
+
+function fetchWeather(lat, lon) {
+  var url = `https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=${lat}&lon=${lon}`;
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", url, true);
+  xhr.timeout = 15000;
+  xhr.setRequestHeader("Accept", "application/json");
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          var data_object = data.properties.timeseries[0].data;
+
+          var t = data_object.instant.details.air_temperature;
+          var uv = data_object.instant.details.ultraviolet_index_clear_sky;
+          var icon = data_object.next_1_hours.summary.symbol_code;
+          var prec = data_object.next_6_hours.details.precipitation_amount;
+
+          var min = data_object.next_6_hours.details.air_temperature_min;
+          var max = data_object.next_6_hours.details.air_temperature_max;
+
+          const temp = Math.round(t);
+          const uv_round = Math.round(uv);
+          const precipitation = Math.round(prec);
+          const min_round = Math.round(min);
+          const max_round = Math.round(max);
+
+          sendDataToPebble(
+            temp,
+            icon,
+            uv_round,
+            precipitation,
+            min_round,
+            max_round
+          );
+        } catch (err) {
+          console.log("JSON parse error: " + err);
+        }
+      }
+    }
+  };
+
+  xhr.send();
+}

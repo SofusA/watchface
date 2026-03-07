@@ -226,7 +226,7 @@ Ui* ui_create(Window *window) {
   text_layer_set_text_color(ui->weather_row_layer, GColorWhite);
   text_layer_set_font(ui->weather_row_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_text_alignment(ui->weather_row_layer, GTextAlignmentCenter);
-  text_layer_set_text(ui->weather_row_layer, "--- | --:--");
+  text_layer_set_text(ui->weather_row_layer, "--- | -- / --");
   layer_add_child(root, text_layer_get_layer(ui->weather_row_layer));
 
   // BT "No Signal" icon (hidden by default)
@@ -286,9 +286,11 @@ void ui_set_date(Ui *ui, const char *date_text) {
   text_layer_set_text(ui->date_layer, date_text ? date_text : "");
 }
 
-void ui_set_weather_row(Ui *ui, const char *temp, const char *sun_text) {
+void ui_set_weather_row(Ui *ui, int32_t cur, int32_t max, int32_t min) {
+  // Format: "6° | 8° / 4°"
   snprintf(ui->weather_row_buf, sizeof(ui->weather_row_buf),
-           "%s | %s", temp ? temp : "---", sun_text ? sun_text : "--:--");
+           "%ld° | %ld° / %ld°",
+           (long)cur, (long)max, (long)min);
   text_layer_set_text(ui->weather_row_layer, ui->weather_row_buf);
 }
 

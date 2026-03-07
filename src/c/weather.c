@@ -4,10 +4,7 @@
 static BitmapLayer *s_icon_layer  = NULL;
 static GBitmap     *s_icon_bitmap = NULL;
 
-static WeatherTempCallback s_on_temp    = NULL;
-static WeatherIntCallback  s_on_uv      = NULL;
-static WeatherIntCallback  s_on_precip  = NULL;
-static WeatherSunCallback  s_on_sun     = NULL;
+static WeatherUpdateCallback s_on_update = NULL;
 
 // Ordered must match your JS ImageId
 static const uint32_t WEATHER_RES_IDS[] = {
@@ -71,51 +68,31 @@ void set_weather_icon(int32_t idx) {
 }
 
 void weather_inbox_parse(DictionaryIterator *iter) {
-  // Temperature: "12°"
-  Tuple *temp_t = dict_find(iter, MESSAGE_KEY_WEATHER_TEMPERATURE);
-  if (temp_t && s_on_temp) {
-    static char buf[8];
-    snprintf(buf, sizeof(buf), "%d°", (int)temp_t->value->int32);
-    s_on_temp(buf);
-  }
-
-  // Icon
+  // Messages are sent in bulk; parse everything and deliver once.
+  Tuple *cur_t  = dict_find(iter, MESSAGE_KEY_WEATHER_TEMPERATURE);
+  Tuple *max_t  = dict_find(iter, MESSAGE_KEY_WEATHER_MAX);
+  Tuple *min_t  = dict_find(iter, MESSAGE_KEY_WEATHER_MIN);
+  Tuple *uv_t   = dict_find(iter, MESSAGE_KEY_WEATHER_UV);
+  Tuple *pr_t   = dict_find(iter, MESSAGE_KEY_WEATHER_PRECIPITATION);
   Tuple *icon_t = dict_find(iter, MESSAGE_KEY_WEATHER_ICON);
+
   if (icon_t) {
     set_weather_icon(icon_t->value->int32);
   }
 
-  // UV index
-  Tuple *uv_t = dict_find(iter, MESSAGE_KEY_WEATHER_UV);
-  if (uv_t && s_on_uv) {
-    s_on_uv(uv_t->value->int32);
-  }
-
-  // Precip mm
-  Tuple *precip_t = dict_find(iter, MESSAGE_KEY_WEATHER_PRECIPITATION);
-  if (precip_t && s_on_precip) {
-    s_on_precip(precip_t->value->int32);
-  }
-
-  // Sun
-  Tuple *sun_t = dict_find(iter, MESSAGE_KEY_SUN_EVENT);
-  if (sun_t && s_on_sun) {
-    s_on_sun(sun_t->value->cstring);
+  if (s_on_update) {
+    int32_t cur = cur_t ? cur_t->value->int32 : 0;
+    int32_t max = max_t ? max_t->value->int32 : 0;
+    int32_t min = min_t ? min_t->value->int32 : 0;
+    int32_t uv  = uv_t  ? uv_t->value->int32  : 0;
+    int32_t pr  = pr_t  ? pr_t->value->int32  : 0;
+    s_on_update(cur, max, min, uv, pr);
   }
 }
 
-void weather_init(
-  BitmapLayer *icon_layer,
-  WeatherTempCallback   on_temp_cb,
-  WeatherIntCallback    on_uv_cb,
-  WeatherIntCallback    on_precip_cb,
-  WeatherSunCallback    on_sun_cb
-) {
+void weather_init(BitmapLayer *icon_layer, WeatherUpdateCallback on_update_cb) {
   s_icon_layer = icon_layer;
-  s_on_temp    = on_temp_cb;
-  s_on_uv      = on_uv_cb;
-  s_on_precip  = on_precip_cb;
-  s_on_sun     = on_sun_cb;
+  s_on_update  = on_update_cb;
 
   set_weather_icon(0);
 }
@@ -126,8 +103,5 @@ void weather_deinit(void) {
     s_icon_bitmap = NULL;
   }
   s_icon_layer = NULL;
-  s_on_temp = NULL;
-  s_on_uv = NULL;
-  s_on_precip = NULL;
-  s_on_sun = NULL;
+  s_on_update = NULL;
 }

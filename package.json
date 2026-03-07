@@ -26,7 +26,8 @@
       "WEATHER_TEMPERATURE",
       "WEATHER_UV",
       "WEATHER_PRECIPITATION",
-      "SUN_EVENT"
+      "WEATHER_MIN",
+      "WEATHER_MAX"
     ],
     "capabilities": [
       "location"
