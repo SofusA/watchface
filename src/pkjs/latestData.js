@@ -3,7 +3,8 @@ var latestData = {
   icon_code: null,
   uv: null,
   precipitation: null,
-  sunEventStr: null
+  min: null,
+  max: null,
 };
 
 function reset() {
@@ -11,10 +12,11 @@ function reset() {
   latestData.icon_code = null;
   latestData.uv = null;
   latestData.precipitation = null;
-  latestData.sunEventStr = null;
+  latestData.min = null;
+  latestData.max = null;
 }
 
 module.exports = {
   latestData: latestData,
-  reset: reset
+  reset: reset,
 };
